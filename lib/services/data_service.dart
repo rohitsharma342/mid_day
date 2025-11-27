@@ -1,7 +1,7 @@
 import '../models/tiffin.dart';
 import '../models/user.dart';
 import '../models/order.dart';
-import '../models/cart_item.dart';
+import '../models/cart.dart';
 
 class DataService {
   static List<Tiffin> getTiffins() {
