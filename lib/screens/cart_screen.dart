@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/cart_controller.dart';
+import '../controllers/user_controller.dart';
+import '../models/cart.dart';
+import '../models/order.dart';
 import '../utils/constants.dart';
 import '../widgets/cart_item.dart';
 
@@ -15,8 +18,7 @@ class CartScreen extends StatelessWidget {
         actions: [
           Consumer<CartController>(
             builder: (context, cartController, child) {
-              if (cartController.isEmpty) return const SizedBox.shrink();
-              
+              if (cartController.isEmpty) return const SizedBox();
               return TextButton(
                 onPressed: () {
                   _showClearCartDialog(context, cartController);
@@ -69,7 +71,7 @@ class CartScreen extends StatelessWidget {
                   },
                 ),
               ),
-              _buildBottomSection(context, cartController),
+              _buildCartSummary(context, cartController),
             ],
           );
         },
@@ -100,7 +102,7 @@ class CartScreen extends StatelessWidget {
           Text(
             'Add some delicious tiffins to get started',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 14,
               color: Colors.grey[500],
             ),
           ),
@@ -109,31 +111,14 @@ class CartScreen extends StatelessWidget {
             onPressed: () {
               Navigator.pop(context);
             },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppConstants.primaryColor,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 32,
-                vertical: 16,
-              ),
-            ),
-            child: const Text(
-              'Browse Tiffins',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
+            child: const Text('Browse Tiffins'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildBottomSection(BuildContext context, CartController cartController) {
+  Widget _buildCartSummary(BuildContext context, CartController cartController) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -141,120 +126,135 @@ class CartScreen extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
+            blurRadius: 8,
             offset: const Offset(0, -2),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Column(
-          children: [
-            _buildOrderSummary(cartController),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () {
-                  _proceedToCheckout(context, cartController);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppConstants.primaryColor,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Items (${cartController.itemCount})',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
-                child: Text(
-                  'Proceed to Checkout (${cartController.itemCount} items)',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+              ),
+              Text(
+                '₹${cartController.totalAmount.toStringAsFixed(0)}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
                 ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Delivery Fee',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                cartController.totalAmount >= 200 ? 'FREE' : '₹30',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: cartController.totalAmount >= 200 
+                      ? AppConstants.primaryColor 
+                      : Colors.black,
+                ),
+              ),
+            ],
+          ),
+          if (cartController.totalAmount < 200) ..[
+            const SizedBox(height: 4),
+            Text(
+              'Add ₹${(200 - cartController.totalAmount).toStringAsFixed(0)} more for free delivery',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildOrderSummary(CartController cartController) {
-    final subtotal = cartController.totalAmount;
-    final deliveryFee = 30.0;
-    final total = subtotal + deliveryFee;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
-      ),
-      child: Column(
-        children: [
-          _buildSummaryRow('Subtotal', '₹${subtotal.toStringAsFixed(0)}'),
-          const SizedBox(height: 8),
-          _buildSummaryRow('Delivery Fee', '₹${deliveryFee.toStringAsFixed(0)}'),
-          const Divider(height: 16),
-          _buildSummaryRow(
-            'Total',
-            '₹${total.toStringAsFixed(0)}',
-            isTotal: true,
+          const Divider(height: 24),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Total',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                '₹${_calculateTotal(cartController.totalAmount).toStringAsFixed(0)}',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppConstants.primaryColor,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                _proceedToCheckout(context, cartController);
+              },
+              child: const Text(
+                'Proceed to Checkout',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSummaryRow(String label, String value, {bool isTotal = false}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: isTotal ? 16 : 14,
-            fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
-            color: isTotal ? Colors.black : Colors.grey[600],
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: isTotal ? 16 : 14,
-            fontWeight: FontWeight.bold,
-            color: isTotal ? AppConstants.primaryColor : Colors.black,
-          ),
-        ),
-      ],
-    );
+  double _calculateTotal(double subtotal) {
+    double deliveryFee = subtotal >= 200 ? 0 : 30;
+    return subtotal + deliveryFee;
   }
 
   void _showClearCartDialog(BuildContext context, CartController cartController) {
     showDialog(
       context: context,
-      builder: (BuildContext dialogContext) {
+      builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Clear Cart'),
           content: const Text('Are you sure you want to remove all items from your cart?'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pop();
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 cartController.clearCart();
-                Navigator.of(dialogContext).pop();
+                Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: const Text('Cart cleared successfully'),
-                    backgroundColor: Colors.red[600],
-                    duration: const Duration(seconds: 2),
+                  const SnackBar(
+                    content: Text('Cart cleared'),
+                    backgroundColor: Colors.red,
+                    duration: Duration(seconds: 2),
                   ),
                 );
               },
@@ -270,14 +270,85 @@ class CartScreen extends StatelessWidget {
   }
 
   void _proceedToCheckout(BuildContext context, CartController cartController) {
-    // TODO: Implement checkout functionality
-    // For now, just show a message
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Checkout functionality coming soon!'),
-        backgroundColor: AppConstants.primaryColor,
-        duration: const Duration(seconds: 2),
+    final userController = Provider.of<UserController>(context, listen: false);
+    
+    if (!userController.isLoggedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please login to proceed'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Create order
+    final order = Order(
+      id: 'order_${DateTime.now().millisecondsSinceEpoch}',
+      items: List.from(cartController.items),
+      totalAmount: _calculateTotal(cartController.totalAmount),
+      status: OrderStatus.pending,
+      orderDate: DateTime.now(),
+      deliveryAddress: userController.user!.addresses.firstWhere(
+        (addr) => addr.isDefault,
+        orElse: () => userController.user!.addresses.first,
       ),
+      paymentMethod: userController.user!.paymentMethods.firstWhere(
+        (method) => method.isDefault,
+        orElse: () => userController.user!.paymentMethods.first,
+      ),
+      estimatedDelivery: DateTime.now().add(const Duration(hours: 2)),
     );
+
+    userController.addOrder(order);
+    cartController.clearCart();
+
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(
+                Icons.check_circle,
+                color: AppConstants.primaryColor,
+                size: 28,
+              ),
+              const SizedBox(width: 8),
+              const Text('Order Placed!'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Order ID: ${order.id}'),
+              const SizedBox(height: 8),
+              Text('Total: ₹${order.totalAmount.toStringAsFixed(0)}'),
+              const SizedBox(height: 8),
+              Text('Estimated delivery: ${_formatTime(order.estimatedDelivery!)}'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Continue Shopping'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    return '$displayHour:$minute $period';
   }
 }

@@ -79,13 +79,14 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTiffinInfo(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   _buildQuantitySelector(),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
                   _buildDescription(),
-                  const SizedBox(height: 24),
-                  _buildSpecifications(),
-                  const SizedBox(height: 100),
+                  const SizedBox(height: 20),
+                  _buildMetalTypeInfo(),
+                  const SizedBox(height: 20),
+                  _buildRatingSection(),
                 ],
               ),
             ),
@@ -180,6 +181,7 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Expanded(
               child: Text(
@@ -190,21 +192,12 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
                 ),
               ),
             ),
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 6,
-              ),
-              decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                widget.tiffin.metalType,
-                style: TextStyle(
-                  color: AppConstants.primaryColor,
-                  fontWeight: FontWeight.w600,
-                ),
+            Text(
+              '₹${widget.tiffin.price.toStringAsFixed(0)}',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: AppConstants.primaryColor,
               ),
             ),
           ],
@@ -212,37 +205,43 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
         const SizedBox(height: 8),
         Row(
           children: [
-            Icon(
-              Icons.star,
-              color: Colors.amber,
-              size: 20,
-            ),
-            const SizedBox(width: 4),
-            Text(
-              widget.tiffin.rating.toStringAsFixed(1),
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: AppConstants.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                widget.tiffin.category,
+                style: TextStyle(
+                  color: AppConstants.primaryColor,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
             const SizedBox(width: 8),
-            Text(
-              '(${widget.tiffin.reviewCount} reviews)',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Text(
+                widget.tiffin.metalType,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
             ),
           ],
-        ),
-        const SizedBox(height: 12),
-        Text(
-          '₹${widget.tiffin.price.toStringAsFixed(0)}',
-          style: TextStyle(
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
-            color: AppConstants.primaryColor,
-          ),
         ),
       ],
     );
@@ -256,10 +255,10 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
           'Quantity',
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Row(
           children: [
             Container(
@@ -280,15 +279,12 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
                     icon: const Icon(Icons.remove),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Text(
                       _quantity.toString(),
                       style: const TextStyle(
                         fontSize: 18,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
@@ -308,7 +304,7 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
               'Total: ₹${(widget.tiffin.price * _quantity).toStringAsFixed(0)}',
               style: TextStyle(
                 fontSize: 16,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.bold,
                 color: AppConstants.primaryColor,
               ),
             ),
@@ -326,14 +322,14 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
           'Description',
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Text(
           widget.tiffin.description,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 14,
             color: Colors.grey[700],
             height: 1.5,
           ),
@@ -342,34 +338,38 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
     );
   }
 
-  Widget _buildSpecifications() {
+  Widget _buildMetalTypeInfo() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Specifications',
+          'Container Material',
           style: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
+            color: Colors.grey[100],
+            borderRadius: BorderRadius.circular(8),
           ),
-          child: Column(
+          child: Row(
             children: [
-              _buildSpecRow('Category', widget.tiffin.category),
-              const Divider(),
-              _buildSpecRow('Metal Type', widget.tiffin.metalType),
-              const Divider(),
-              _buildSpecRow('Rating', '${widget.tiffin.rating}/5.0'),
-              const Divider(),
-              _buildSpecRow('Reviews', widget.tiffin.reviewCount.toString()),
+              Icon(
+                Icons.eco,
+                color: AppConstants.primaryColor,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${widget.tiffin.metalType} Container',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
             ],
           ),
         ),
@@ -377,23 +377,40 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
     );
   }
 
-  Widget _buildSpecRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildRatingSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          label,
+        const Text(
+          'Rating & Reviews',
           style: TextStyle(
-            fontSize: 14,
-            color: Colors.grey[600],
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            Row(
+              children: List.generate(5, (index) {
+                return Icon(
+                  index < widget.tiffin.rating.floor()
+                      ? Icons.star
+                      : Icons.star_border,
+                  color: Colors.amber,
+                  size: 20,
+                );
+              }),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '${widget.tiffin.rating.toStringAsFixed(1)} (${widget.tiffin.reviewCount} reviews)',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
+          ],
         ),
       ],
     );
@@ -407,82 +424,62 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
+            blurRadius: 8,
             offset: const Offset(0, -2),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Consumer<CartController>(
-          builder: (context, cartController, child) {
-            final isInCart = cartController.hasItem(widget.tiffin.id);
-            final cartQuantity = cartController.getQuantity(widget.tiffin.id);
-            
-            return Row(
-              children: [
-                if (isInCart)
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const CartScreen()),
-                        );
-                      },
-                      style: OutlinedButton.styleFrom(
-                        side: BorderSide(color: AppConstants.primaryColor),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                      ),
-                      child: Text(
-                        'View Cart ($cartQuantity)',
-                        style: TextStyle(
-                          color: AppConstants.primaryColor,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
-                  ),
-                if (isInCart) const SizedBox(width: 12),
+      child: Consumer<CartController>(
+        builder: (context, cartController, child) {
+          final existingItem = cartController.getItem(widget.tiffin.id);
+          
+          return Row(
+            children: [
+              if (existingItem != null) ..[
                 Expanded(
-                  child: ElevatedButton(
+                  child: OutlinedButton(
                     onPressed: () {
-                      cartController.addToCart(widget.tiffin, quantity: _quantity);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            isInCart
-                                ? 'Updated quantity in cart'
-                                : 'Added to cart successfully',
-                          ),
-                          backgroundColor: AppConstants.primaryColor,
-                          duration: const Duration(seconds: 2),
-                        ),
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CartScreen()),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppConstants.primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                    ),
                     child: Text(
-                      isInCart ? 'Add More' : 'Add to Cart',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
+                      'View Cart (${cartController.itemCount})',
+                      style: TextStyle(
+                        color: AppConstants.primaryColor,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
                 ),
+                const SizedBox(width: 12),
               ],
-            );
-          },
-        ),
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () {
+                    cartController.addToCart(widget.tiffin, quantity: _quantity);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          '${widget.tiffin.name} added to cart!',
+                        ),
+                        backgroundColor: AppConstants.primaryColor,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    existingItem != null ? 'Add More' : 'Add to Cart',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
