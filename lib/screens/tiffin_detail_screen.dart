@@ -435,7 +435,7 @@ class _TiffinDetailScreenState extends State<TiffinDetailScreen> {
           
           return Row(
             children: [
-              if (existingItem != null) ..[
+              if (existingItem != null) ...[
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {

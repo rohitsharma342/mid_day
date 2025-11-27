@@ -175,7 +175,7 @@ class CartScreen extends StatelessWidget {
               ),
             ],
           ),
-          if (cartController.totalAmount < 200) ..[
+          if (cartController.totalAmount < 200) ...[
             const SizedBox(height: 4),
             Text(
               'Add ₹${(200 - cartController.totalAmount).toStringAsFixed(0)} more for free delivery',
@@ -323,7 +323,7 @@ class CartScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Order ID: ${order.id}'),
+              Text('Order ID: ${order.id.substring(order.id.length - 6)}'),
               const SizedBox(height: 8),
               Text('Total: ₹${order.totalAmount.toStringAsFixed(0)}'),
               const SizedBox(height: 8),
