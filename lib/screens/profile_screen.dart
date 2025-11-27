@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../controllers/user_controller.dart';
+import '../models/order.dart';
 import '../utils/constants.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -31,7 +32,7 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: 24),
                 _buildProfileOptions(context, userController),
                 const SizedBox(height: 24),
-                _buildOrderHistory(userController),
+                _buildOrderHistory(context, userController),
               ],
             ),
           );
@@ -186,7 +187,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildOrderHistory(UserController userController) {
+  Widget _buildOrderHistory(BuildContext context, UserController userController) {
     final orders = userController.orders;
     
     return Column(
@@ -255,7 +256,7 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   Text('₹${order.totalAmount.toStringAsFixed(0)}'),
                   Text(
-                    order.status.displayName,
+                    _getStatusDisplayName(order.status),
                     style: TextStyle(
                       color: _getStatusColor(order.status),
                       fontWeight: FontWeight.w500,
@@ -265,7 +266,7 @@ class ProfileScreen extends StatelessWidget {
               ),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
               onTap: () {
-                _showOrderDetails(order);
+                _showOrderDetails(context, order);
               },
             ),
           )),
@@ -273,30 +274,51 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Color _getStatusColor(status) {
-    switch (status.toString()) {
-      case 'OrderStatus.delivered':
+  String _getStatusDisplayName(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.pending:
+        return 'Pending';
+      case OrderStatus.confirmed:
+        return 'Confirmed';
+      case OrderStatus.preparing:
+        return 'Preparing';
+      case OrderStatus.outForDelivery:
+        return 'Out for Delivery';
+      case OrderStatus.delivered:
+        return 'Delivered';
+      case OrderStatus.cancelled:
+        return 'Cancelled';
+      default:
+        return 'Unknown';
+    }
+  }
+
+  Color _getStatusColor(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.delivered:
         return Colors.green;
-      case 'OrderStatus.outForDelivery':
+      case OrderStatus.outForDelivery:
         return Colors.blue;
-      case 'OrderStatus.preparing':
+      case OrderStatus.preparing:
+      case OrderStatus.confirmed:
         return Colors.orange;
-      case 'OrderStatus.cancelled':
+      case OrderStatus.cancelled:
         return Colors.red;
       default:
         return Colors.grey;
     }
   }
 
-  IconData _getStatusIcon(status) {
-    switch (status.toString()) {
-      case 'OrderStatus.delivered':
+  IconData _getStatusIcon(OrderStatus status) {
+    switch (status) {
+      case OrderStatus.delivered:
         return Icons.check_circle;
-      case 'OrderStatus.outForDelivery':
+      case OrderStatus.outForDelivery:
         return Icons.local_shipping;
-      case 'OrderStatus.preparing':
+      case OrderStatus.preparing:
+      case OrderStatus.confirmed:
         return Icons.restaurant;
-      case 'OrderStatus.cancelled':
+      case OrderStatus.cancelled:
         return Icons.cancel;
       default:
         return Icons.pending;
@@ -306,7 +328,7 @@ class ProfileScreen extends StatelessWidget {
   void _showAddressesDialog(BuildContext context, UserController userController) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Delivery Addresses'),
         content: SizedBox(
           width: double.maxFinite,
@@ -335,7 +357,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Close'),
           ),
         ],
@@ -346,7 +368,7 @@ class ProfileScreen extends StatelessWidget {
   void _showPaymentMethodsDialog(BuildContext context, UserController userController) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Payment Methods'),
         content: SizedBox(
           width: double.maxFinite,
@@ -375,7 +397,7 @@ class ProfileScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Close'),
           ),
         ],
@@ -401,18 +423,18 @@ class ProfileScreen extends StatelessWidget {
   void _showLogoutDialog(BuildContext context, UserController userController) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.pop(dialogContext),
             child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () {
               userController.logout();
-              Navigator.pop(context);
+              Navigator.pop(dialogContext);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -430,8 +452,7 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showOrderDetails(order) {
-    // TODO: Implement order details screen
+  void _showOrderDetails(BuildContext context, order) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('Order details screen coming soon!'),

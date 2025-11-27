@@ -36,7 +36,7 @@ class CartScreen extends StatelessWidget {
       body: Consumer<CartController>(
         builder: (context, cartController, child) {
           if (cartController.isEmpty) {
-            return _buildEmptyCart();
+            return _buildEmptyCart(context);
           }
 
           return Column(
@@ -69,7 +69,7 @@ class CartScreen extends StatelessWidget {
                   },
                 ),
               ),
-              _buildBottomSection(cartController),
+              _buildBottomSection(context, cartController),
             ],
           );
         },
@@ -77,7 +77,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildEmptyCart() {
+  Widget _buildEmptyCart(BuildContext context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -133,7 +133,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomSection(CartController cartController) {
+  Widget _buildBottomSection(BuildContext context, CartController cartController) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -155,7 +155,7 @@ class CartScreen extends StatelessWidget {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  _proceedToCheckout(cartController);
+                  _proceedToCheckout(context, cartController);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppConstants.primaryColor,
@@ -235,21 +235,21 @@ class CartScreen extends StatelessWidget {
   void _showClearCartDialog(BuildContext context, CartController cartController) {
     showDialog(
       context: context,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           title: const Text('Clear Cart'),
           content: const Text('Are you sure you want to remove all items from your cart?'),
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
               },
               child: const Text('Cancel'),
             ),
             TextButton(
               onPressed: () {
                 cartController.clearCart();
-                Navigator.of(context).pop();
+                Navigator.of(dialogContext).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: const Text('Cart cleared successfully'),
@@ -269,7 +269,7 @@ class CartScreen extends StatelessWidget {
     );
   }
 
-  void _proceedToCheckout(CartController cartController) {
+  void _proceedToCheckout(BuildContext context, CartController cartController) {
     // TODO: Implement checkout functionality
     // For now, just show a message
     ScaffoldMessenger.of(context).showSnackBar(
